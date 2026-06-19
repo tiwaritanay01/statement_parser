@@ -10,6 +10,8 @@ export const auth = betterAuth({
     emailAndPassword: {
         enabled: true,
     },
+    secret: process.env.BETTER_AUTH_SECRET || "fallback-secret-for-development-only-replace-me-1234567890",
+    baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
     trustedOrigins: process.env.FRONTEND_URL 
         ? [process.env.FRONTEND_URL, "http://localhost:3001", "http://127.0.0.1:3001"] 
         : ["http://localhost:3001", "http://127.0.0.1:3001"],
