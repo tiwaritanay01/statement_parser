@@ -10,7 +10,7 @@ const app = new Hono();
 app.use(
     '/api/*',
     cors({
-        origin: process.env.CORS_ORIGIN || 'http://localhost:3001',
+        origin: process.env.CORS_ORIGIN || process.env.FRONTEND_URL || 'http://localhost:3001',
         credentials: true,
         allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
         allowHeaders: ['Content-Type', 'Authorization', 'x-tenant-id'],

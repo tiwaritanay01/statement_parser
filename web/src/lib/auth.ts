@@ -6,7 +6,8 @@ export async function requireAuth() {
   const allCookies = cookieStore.getAll().map(c => `${c.name}=${c.value}`).join('; ');
   
   try {
-    const res = await fetch("http://localhost:3000/api/auth/get-session", {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
+    const res = await fetch(`${apiUrl}/auth/get-session`, {
       headers: {
         cookie: allCookies,
       },
