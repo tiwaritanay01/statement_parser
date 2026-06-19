@@ -1,6 +1,15 @@
 import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
+
+// Inject fallbacks for Better Auth in production environments like Railway if they are missing
+if (!process.env.BETTER_AUTH_SECRET) {
+    process.env.BETTER_AUTH_SECRET = "fallback-secret-that-must-be-at-least-32-characters-long-to-satisfy-better-auth-in-production";
+}
+if (!process.env.BETTER_AUTH_URL) {
+    process.env.BETTER_AUTH_URL = process.env.PORT ? `http://localhost:${process.env.PORT}` : "http://localhost:3000";
+}
+
 import { apiRouter } from './routes/index.js';
 import { auth } from './auth/auth.js';
 
