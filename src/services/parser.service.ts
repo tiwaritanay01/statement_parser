@@ -6,6 +6,28 @@ export interface ParsedTransaction {
     confidence: number;
 }
 
+function calculateConfidence(
+    date: Date, 
+    description: string, 
+    amountFound: boolean, 
+    balanceFound: boolean
+): number {
+    const dateFound = date && !isNaN(date.getTime());
+    const descriptionFound = typeof description === 'string' && description.trim().length > 0 && description !== "Unknown Transaction" && description !== "Parsed Transaction";
+
+    const score = 
+        (dateFound ? 25 : 0) +
+        (descriptionFound ? 25 : 0) +
+        (amountFound ? 25 : 0) +
+        (balanceFound ? 25 : 0);
+
+    const rawConfidence = score / 100;
+
+    return Number.isFinite(rawConfidence)
+        ? Math.max(0, Math.min(1, rawConfidence))
+        : 0;
+}
+
 export function parseTransaction(text: string): ParsedTransaction {
     const trimmed = text.trim();
 
@@ -20,7 +42,7 @@ export function parseTransaction(text: string): ParsedTransaction {
     if (match1) {
         const rawDate = match1[1].trim();
         const rawDesc = match1[2].trim();
-        const rawAmount = match1[3].trim().replace(/[^\d.-]/g, ""); // Allow negative and decimals
+        const rawAmount = match1[3].trim().replace(/[^\d.-]/g, "");
         const rawBalance = match1[4].trim().replace(/[^\d.-]/g, "");
 
         const date = new Date(rawDate);
@@ -33,7 +55,7 @@ export function parseTransaction(text: string): ParsedTransaction {
                 description: rawDesc,
                 amount,
                 balance,
-                confidence: 1.0,
+                confidence: calculateConfidence(date, rawDesc, true, true),
             };
         }
     }
@@ -52,10 +74,7 @@ export function parseTransaction(text: string): ParsedTransaction {
         const direction = match2[4].toLowerCase();
         const rawBalance = match2[5].trim().replace(/[^\d.]/g, "");
 
-        // Determine correct Date parsing for MM/DD/YYYY vs DD/MM/YYYY
-        // For Sample 2: 12/11/2025 (Dec 11, 2025)
         const dateParts = rawDate.split(/[\/-]/);
-        // Treat as MM/DD/YYYY (US format)
         const date = new Date(
             parseInt(dateParts[2], 10),
             parseInt(dateParts[0], 10) - 1,
@@ -77,7 +96,7 @@ export function parseTransaction(text: string): ParsedTransaction {
                 description: rawDesc,
                 amount,
                 balance,
-                confidence: 1.0,
+                confidence: calculateConfidence(date, rawDesc, true, true),
             };
         }
     }
@@ -109,20 +128,18 @@ export function parseTransaction(text: string): ParsedTransaction {
                 description: rawDesc,
                 amount,
                 balance,
-                confidence: 1.0,
+                confidence: calculateConfidence(date, rawDesc, true, true),
             };
         }
     }
 
     // 4. Heuristic Fallback (Defensive Parsing)
-    // Try to extract date
     const dateMatch = trimmed.match(
         /(\d{1,2}\s+[a-zA-Z]{3}\s+\d{4})|(\d{1,2}[\/-]\d{1,2}[\/-]\d{4})|(\d{4}-\d{2}-\d{2})/
     );
-    // Try to extract amounts/balance
     const amountMatches = [...trimmed.matchAll(/(?:-|₹|\bRs\.?|\bAmt:?)\s*([\d,]+\.\d{2})/gi)];
     
-    let date = new Date();
+    let date = new Date(NaN); // Use invalid date as default to avoid false positives
     if (dateMatch) {
         const tempDate = new Date(dateMatch[0]);
         if (!isNaN(tempDate.getTime())) {
@@ -130,36 +147,43 @@ export function parseTransaction(text: string): ParsedTransaction {
         }
     }
 
-    let amount = 0;
+    let amount = 0; // Default safe fallback
     let balance: number | null = null;
-    let confidence = 0.2;
+    let amountFound = false;
+    let balanceFound = false;
 
     if (amountMatches.length > 0) {
-        // Assume first amount found is the transaction amount, second is balance
         const val1 = parseFloat(amountMatches[0][1].replace(/,/g, ""));
         if (!isNaN(val1)) {
             amount = val1;
-            confidence = 0.5;
+            amountFound = true;
         }
         if (amountMatches.length > 1) {
             const val2 = parseFloat(amountMatches[1][1].replace(/,/g, ""));
             if (!isNaN(val2)) {
                 balance = val2;
-                confidence = 0.7;
+                balanceFound = true;
             }
         }
     }
 
-    // Try to derive description by taking the first line, removing dates and amounts
-    let description = trimmed.split("\n")[0] || "Unknown Transaction";
+    // Attempt to derive description
+    let description = trimmed.split("\n")[0] || "";
     if (dateMatch) {
         description = description.replace(dateMatch[0], "");
     }
-    description = description.replace(/[^\w\s\-\*#\.\/]/g, "").trim() || "Parsed Transaction";
+    description = description.replace(/[^\w\s\-\*#\.\/]/g, "").trim() || "";
+
+    const confidence = calculateConfidence(date, description, amountFound, balanceFound);
+
+    // If date is invalid, we still must supply a valid date to the DB schema
+    if (isNaN(date.getTime())) {
+        date = new Date(); // fallback to current date so Prisma doesn't crash
+    }
 
     return {
         date,
-        description,
+        description: description || "Unknown Transaction",
         amount,
         balance,
         confidence,

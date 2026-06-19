@@ -47,6 +47,26 @@ Available Balance → ₹17,170.50
         expect(result.date.getMonth()).toBe(11); // December
         expect(result.date.getDate()).toBe(10);
     });
+
+    test("missing balance should return 0.75 confidence", () => {
+        const missingBalance = `Date: 11 Dec 2025\nDescription: SOME STORE\nAmount: -420.00`;
+        const result = parseTransaction(missingBalance);
+        expect(result.confidence).toBe(0.75);
+    });
+
+    test("missing amount should return <= 0.75 confidence", () => {
+        const missingAmount = `11 Dec 2025 STORE PURCHASE NO AMOUNT NO BALANCE`;
+        const result = parseTransaction(missingAmount);
+        expect(result.confidence).toBeLessThanOrEqual(0.75);
+    });
+
+    test("confidence must never be NaN or Infinity, and must be between 0 and 1", () => {
+        const junk = `NO MEANINGFUL DATA AT ALL 123456789`;
+        const result = parseTransaction(junk);
+        expect(Number.isNaN(result.confidence)).toBe(false);
+        expect(result.confidence).toBeGreaterThanOrEqual(0);
+        expect(result.confidence).toBeLessThanOrEqual(1);
+    });
 });
 
 describe("Transaction Repository Integration", () => {
