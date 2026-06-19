@@ -10,6 +10,12 @@ export const auth = betterAuth({
     emailAndPassword: {
         enabled: true,
     },
+    trustedOrigins: ["http://localhost:3001", "http://127.0.0.1:3001"],
+    advanced: {
+        crossSubDomainCookies: {
+            enabled: true,
+        }
+    },
     session: {
         expiresIn: 60 * 60 * 24 * 7, // 7 days in seconds
         updateAge: 60 * 60 * 24,    // 1 day in seconds
