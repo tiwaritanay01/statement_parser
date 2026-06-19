@@ -24,6 +24,8 @@ export interface TransactionDTO {
   date: Date;
   description: string;
   amount: number;
+  balance?: number | null;
+  confidence: number;
   currency: string;
   category?: string;
   metadata?: Record<string, any>;

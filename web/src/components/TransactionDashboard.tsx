@@ -209,13 +209,13 @@ export default function TransactionDashboard({ user }: { user: any }) {
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-1.5">
-                            {t.confidence >= 0.9 ? (
+                            {typeof t.confidence === 'number' && t.confidence >= 0.9 ? (
                               <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                             ) : (
                               <AlertCircle className="w-4 h-4 text-amber-500" />
                             )}
-                            <span className={t.confidence >= 0.9 ? 'text-emerald-400' : 'text-amber-400'}>
-                              {Math.round(t.confidence * 100)}%
+                            <span className={typeof t.confidence === 'number' && t.confidence >= 0.9 ? 'text-emerald-400' : 'text-amber-400'}>
+                              {Math.round((t.confidence ?? 0) * 100)}%
                             </span>
                           </div>
                         </TableCell>
