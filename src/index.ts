@@ -38,6 +38,13 @@ app.get('/', (c) => {
     return c.text('Hello Hono!');
 });
 
+app.get("/debug/env", (c) => {
+    return c.json({
+        FRONTEND_URL: process.env.FRONTEND_URL,
+        NODE_ENV: process.env.NODE_ENV,
+    });
+});
+
 const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
 serve(
