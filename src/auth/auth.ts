@@ -16,8 +16,9 @@ export const auth = betterAuth({
         process.env.FRONTEND_URL || "http://localhost:3001",
     ],
     advanced: {
-        crossSubDomainCookies: {
-            enabled: true,
+        defaultCookieAttributes: {
+            sameSite: "none",
+            secure: true,
         }
     },
     session: {
