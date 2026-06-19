@@ -19,7 +19,14 @@ const app = new Hono();
 app.use(
     '/api/*',
     cors({
-        origin: process.env.CORS_ORIGIN || process.env.FRONTEND_URL || 'http://localhost:3001',
+        origin: (origin) => {
+            if (!origin) return 'http://localhost:3001';
+            // Dynamically allow ANY Vercel preview or production domain, plus localhost
+            if (origin.endsWith('.vercel.app') || origin.includes('localhost') || origin === process.env.FRONTEND_URL) {
+                return origin;
+            }
+            return process.env.FRONTEND_URL || 'http://localhost:3001';
+        },
         credentials: true,
         allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
         allowHeaders: ['Content-Type', 'Authorization', 'x-tenant-id'],
