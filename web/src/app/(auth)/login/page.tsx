@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { signIn } from "@/lib/auth-client";
+import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,13 +26,16 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const result = await signIn.email({
-        email,
-        password,
+      const { data, error } = await api("/auth/login", {
+        method: "POST",
+        body: {
+          email,
+          password,
+        }
       });
 
-      if (result.error) {
-        toast.error(result.error.message || "Invalid email or password");
+      if (error) {
+        toast.error((error as any).error || "Invalid email or password");
       } else {
         toast.success("Successfully logged in!");
         router.push("/");
