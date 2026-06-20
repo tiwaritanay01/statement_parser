@@ -16,6 +16,13 @@ export type AuthEnv = {
 
 export const authMiddleware: MiddlewareHandler<AuthEnv> = async (c, next) => {
     try {
+        // --- DEBUG LOGS START ---
+        console.log("=== AUTH MIDDLEWARE DEBUG ===");
+        console.log("AUTH HEADER RECEIVED:", c.req.header("authorization"));
+        console.log("COOKIE HEADER RECEIVED:", c.req.header("cookie"));
+        console.log("=============================");
+        // --- DEBUG LOGS END ---
+
         const session = await auth.api.getSession({ headers: c.req.raw.headers });
 
         if (!session || !session.user) {
@@ -61,4 +68,3 @@ export const authMiddleware: MiddlewareHandler<AuthEnv> = async (c, next) => {
         return c.json({ error: "Internal Server Error" }, 500);
     }
 };
-
