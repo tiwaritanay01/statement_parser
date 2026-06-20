@@ -24,44 +24,68 @@ The repository uses a workspace-like structure, separating the frontend and back
 - `/web`: Contains the Next.js frontend application, built with Tailwind and shadcn/ui.
 - `/shared`: Shared TypeScript definitions (DTOs) used by both the frontend client and the backend server to ensure end-to-end type safety.
 
-## Setup Instructions
-1. Clone the repository to your local machine.
-2. Install backend dependencies from the root directory:
-   ```bash
-   npm install
-   ```
-3. Install frontend dependencies:
-   ```bash
-   cd web
-   npm install
-   ```
-4. Generate the Prisma Client:
-   ```bash
-   npx prisma generate
-   ```
+## Setup Instructions (Local Development)
 
-## Environment Variables
-Create a `.env` file in the root directory and configure the following variables:
-```env
-# Database connection string (PostgreSQL)
-DATABASE_URL="postgresql://user:password@localhost:5432/vessify_db"
+To run this project entirely locally without relying on any cloud providers, follow these exact steps.
 
-# Better Auth Configuration
-BETTER_AUTH_SECRET="your-super-secret-key-at-least-32-chars"
+### 1. Prerequisites
+- **Node.js** (v18 or higher)
+- **PostgreSQL** running locally (e.g., via Docker, Postgres.app, or a local service)
+
+### 2. Install Dependencies
+Install dependencies for both the backend and frontend:
+```bash
+# Install backend dependencies
+npm install
+
+# Install frontend dependencies
+cd web
+npm install
+cd ..
 ```
 
-## Run Backend
-From the root directory, start the Hono backend development server (runs on port `3000`):
+### 3. Environment Configuration
+You need two `.env` files. 
+
+**Root Directory (`/.env`)**
+Create a `.env` file in the root for the backend:
+```env
+DATABASE_URL="postgresql://postgres:password@localhost:5432/vessify_db"
+BETTER_AUTH_SECRET="your-super-secret-key-at-least-32-chars"
+BETTER_AUTH_URL="http://localhost:3000"
+FRONTEND_URL="http://localhost:3001"
+```
+
+**Frontend Directory (`/web/.env.local`)**
+Create a `.env.local` file inside the `web` folder:
+```env
+NEXT_PUBLIC_API_URL="http://localhost:3000/api"
+```
+
+### 4. Database Setup
+Ensure your local PostgreSQL server is running and the database specified in `DATABASE_URL` exists. Then, push the schema to your database:
 ```bash
+# Push schema and generate Prisma client
+npx prisma db push
+```
+
+### 5. Run the Application
+You need to run the backend and frontend simultaneously in two separate terminal windows.
+
+**Terminal 1: Start Backend**
+```bash
+# From the root directory
 npm run dev
 ```
+*Backend will run on http://localhost:3000*
 
-## Run Frontend
-In a new terminal window, navigate to the `web` directory and start the Next.js frontend (runs on port `3001`):
+**Terminal 2: Start Frontend**
 ```bash
+# From the root directory
 cd web
 npm run dev
 ```
+*Frontend will run on http://localhost:3001*
 
 ## Run Tests
 The backend includes a comprehensive Jest test suite validating parser accuracy and tenant isolation. Run the tests from the root directory:
