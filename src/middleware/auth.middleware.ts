@@ -17,7 +17,7 @@ export type AuthEnv = {
 export const authMiddleware: MiddlewareHandler<AuthEnv> = async (c, next) => {
     try {
         const session = await auth.api.getSession({ headers: c.req.raw.headers });
-        
+
         if (!session || !session.user) {
             return c.json({ error: "Unauthorized" }, 401);
         }
@@ -61,3 +61,4 @@ export const authMiddleware: MiddlewareHandler<AuthEnv> = async (c, next) => {
         return c.json({ error: "Internal Server Error" }, 500);
     }
 };
+

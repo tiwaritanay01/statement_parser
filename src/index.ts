@@ -45,6 +45,13 @@ app.get("/debug/env", (c) => {
     });
 });
 
+app.get("/debug/headers", (c) => {
+    return c.json({
+        cookie: c.req.header("cookie"),
+        authorization: c.req.header("authorization"),
+    });
+});
+
 const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
 serve(
