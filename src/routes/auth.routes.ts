@@ -108,9 +108,17 @@ authRouter.post(
             return c.json({ error: "Failed to initialize tenant structure" }, 500);
         }
 
-        // 4. Forward Better Auth set-cookie/auth headers to client
+        // Forward Better Auth set-cookie/auth headers to client, forcing SameSite=None
         authResponse.headers.forEach((value, key) => {
-            c.header(key, value);
+            if (key.toLowerCase() === 'set-cookie') {
+                let cookieVal = value.replace(/SameSite=Lax/ig, "SameSite=None");
+                if (!/Secure/i.test(cookieVal)) {
+                    cookieVal += "; Secure";
+                }
+                c.header(key, cookieVal);
+            } else {
+                c.header(key, value);
+            }
         });
 
         return c.json({
@@ -148,9 +156,17 @@ authRouter.post(
 
         const data = await authResponse.json();
 
-        // Forward Better Auth set-cookie/auth headers to client
+        // Forward Better Auth set-cookie/auth headers to client, forcing SameSite=None
         authResponse.headers.forEach((value, key) => {
-            c.header(key, value);
+            if (key.toLowerCase() === 'set-cookie') {
+                let cookieVal = value.replace(/SameSite=Lax/ig, "SameSite=None");
+                if (!/Secure/i.test(cookieVal)) {
+                    cookieVal += "; Secure";
+                }
+                c.header(key, cookieVal);
+            } else {
+                c.header(key, value);
+            }
         });
 
         console.log("SET COOKIE:", authResponse.headers.get("set-cookie"));
