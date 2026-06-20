@@ -63,3 +63,5 @@ serve(
         console.log(`Server is running on http://localhost:${info.port}`);
     }
 );
+console.log("COMMIT CHECK");
+console.log("JWKS MIGRATION EXPECTED");
