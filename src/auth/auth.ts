@@ -3,6 +3,10 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "../lib/db.js";
 import { bearer } from "better-auth/plugins";
 
+console.log("AUTH FILE LOADED");
+console.log("AUTH COMMIT 0a6de5a");
+console.log("PLUGINS:", ["bearer"]);
+
 export const auth = betterAuth({
     database: prismaAdapter(prisma, {
         provider: "postgresql",
