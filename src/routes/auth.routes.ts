@@ -153,6 +153,8 @@ authRouter.post(
             c.header(key, value);
         });
 
+        console.log("SET COOKIE:", authResponse.headers.get("set-cookie"));
+
         return c.json(data);
     }
 );

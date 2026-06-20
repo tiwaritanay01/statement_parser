@@ -37,6 +37,9 @@ export default function LoginPage() {
       if (error) {
         toast.error((error as any).error || "Invalid email or password");
       } else {
+        if ((data as any)?.token) {
+          localStorage.setItem("token", (data as any).token);
+        }
         toast.success("Successfully logged in!");
         router.push("/");
         router.refresh();
