@@ -121,12 +121,17 @@ authRouter.post(
             }
         });
 
+        // Extract token from header to send in response body
+        const token = authResponse.headers.get("set-auth-token") || 
+                     (authResponse.headers.get("set-cookie")?.match(/session_token=([^;]+)/)?.[1]);
+
         return c.json({
             user: {
                 id: user.id,
                 email: user.email,
                 name: user.name,
             },
+            token: token,
             message: "Registration successful",
         }, 201);
     }
@@ -171,7 +176,14 @@ authRouter.post(
 
         console.log("SET COOKIE:", authResponse.headers.get("set-cookie"));
 
-        return c.json(data);
+        // Extract token from header to send in response body
+        const token = authResponse.headers.get("set-auth-token") || 
+                     (authResponse.headers.get("set-cookie")?.match(/session_token=([^;]+)/)?.[1]);
+
+        return c.json({
+            ...data,
+            token: token
+        });
     }
 );
 
